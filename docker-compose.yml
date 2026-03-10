@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    image: nl2sql-backend:local
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: nl2sql-frontend:local
+    ports:
+      - "3000:80"
+
+# Usage: `docker compose up --build` to run both services locally

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nl2sql-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nl2sql-frontend
+  template:
+    metadata:
+      labels:
+        app: nl2sql-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: nl2sql-frontend:latest
+        ports:
+        - containerPort: 80

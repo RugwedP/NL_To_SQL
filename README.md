@@ -235,6 +235,41 @@ uvicorn api:app --reload
 API running at: **http://localhost:8000**
 API docs at: **http://localhost:8000/docs**
 
+## Docker & Kubernetes
+
+Quick guide to build images locally and run with Docker Compose or deploy to Kubernetes.
+
+- Build backend image:
+
+```bash
+docker build -f backend.Dockerfile -t nl2sql-backend:local .
+```
+
+- Build frontend image (from `frontend/`):
+
+```bash
+cd frontend
+docker build -t nl2sql-frontend:local .
+```
+
+- Run locally with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+- Kubernetes manifests are in the `k8s/` folder. Example to apply locally (minikube/kind/GKE):
+
+```bash
+kubectl apply -f k8s/backend-deployment.yaml
+kubectl apply -f k8s/backend-service.yaml
+kubectl apply -f k8s/frontend-deployment.yaml
+kubectl apply -f k8s/frontend-service.yaml
+```
+
+Notes:
+- Images in the manifests reference `nl2sql-backend:latest` and `nl2sql-frontend:latest` — push them to a registry or load them into your k8s cluster (e.g., `kind load docker-image` or `minikube image load`).
+- If you want an Ingress or LoadBalancer, add an `ingress.yaml` or change service `type` to `LoadBalancer`.
 ### Step 7 — Start the React frontend
 
 Open a second terminal:

@@ -5,13 +5,13 @@ FROM node:24-alpine AS builder
 WORKDIR /app
 
 # Copy package.json first (for Docker cache optimization)
-COPY package.json .
+COPY /frontend/package.json .
 
 # Install dependencies
 RUN npm install
 
 # Copy rest of frontend code
-COPY . .
+COPY frontend/ .
 
 # Build the React app for production
 RUN npm run build

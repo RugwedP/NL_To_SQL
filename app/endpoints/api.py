@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from app.services.NL2sql import process_question
 from app.execution.database import execute_query, test_connection
 from app.bigquery_client import execute_bigquery
-
+import re
 app = FastAPI(
     title="NL2SQL API",
     description="Convert natural language questions to SQL and execute on PostgreSQL",
@@ -76,6 +76,12 @@ def ask(request: QuestionRequest):
                 f" {table} ",
                 f" `bigquery-public-data.thelook_ecommerce.{table}` "
             )
+        
+        # Add LIMIT 100 if no limit exists — prevents browser freeze
+        
+        if not re.search(r'\bLIMIT\b', sql, re.IGNORECASE):
+            sql = sql.rstrip().rstrip(";") + " LIMIT 100"
+    
         db_result = execute_bigquery(sql)
 
     return NL2SQLResponse(

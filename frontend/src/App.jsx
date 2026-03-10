@@ -119,9 +119,15 @@ function ResultCard({ result }) {
   const [chartType, setChartType] = useState(null);
   const db = result.db_result;
 
-  useEffect(() => {
-    if (db?.columns && db?.rows)
-      setChartType(guessChartType(db.columns, db.rows));
+  // useEffect(() => {
+  //   if (db?.columns && db?.rows)
+  //     setChartType(guessChartType(db.columns, db.rows));
+  // }, [result]);
+    useEffect(() => {
+    if (db?.columns && db?.rows) {
+      const guessed = guessChartType(db.columns, db.rows);
+      setChartType(guessed || "table");  // always fallback to table
+    }
   }, [result]);
 
   const hasData = db?.success && db?.rows?.length > 0;
@@ -209,35 +215,37 @@ function ResultCard({ result }) {
         </div>
       )}
 
-      {/* Chart switcher + visualization */}
-      {hasData && (
-        <>
-          {hasNumbers && (
-            <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
-              {["table", "bar", "line", "pie"].map(t => (
-                <button key={t} onClick={() => setChartType(t)}
-                  style={{
-                    background: chartType === t ? "#10B981" : "transparent",
-                    border: "1px solid #1a3a2a", borderRadius: 6,
-                    color: chartType === t ? "#000" : "#6EE7B7",
-                    padding: "4px 12px", fontSize: 11, cursor: "pointer",
-                    fontFamily: "'Space Mono', monospace", textTransform: "uppercase",
-                    letterSpacing: "0.05em", transition: "all 0.2s"
-                  }}>
-                  {t === "table" ? "⊞" : t === "bar" ? "▐▐" : t === "line" ? "╱╲" : "◉"} {t}
-                </button>
-              ))}
-            </div>
-          )}
+     {/* Chart switcher + visualization */}
+{hasData && (
+  <>
+    {/* Show chart toggle buttons only if numeric data exists */}
+    {hasNumbers && (
+      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+        {["table", "bar", "line", "pie"].map(t => (
+          <button key={t} onClick={() => setChartType(t)}
+            style={{
+              background: chartType === t ? "#10B981" : "transparent",
+              border: "1px solid #1a3a2a", borderRadius: 6,
+              color: chartType === t ? "#000" : "#6EE7B7",
+              padding: "4px 12px", fontSize: 11, cursor: "pointer",
+              fontFamily: "'Space Mono', monospace", textTransform: "uppercase",
+              letterSpacing: "0.05em", transition: "all 0.2s"
+            }}>
+            {t === "table" ? "⊞" : t === "bar" ? "▐▐" : t === "line" ? "╱╲" : "◉"} {t}
+          </button>
+        ))}
+      </div>
+    )}
 
-          <div style={{ marginTop: 8 }}>
-            {chartType === "bar"  && <BarViz  columns={db.columns} rows={db.rows} />}
-            {chartType === "line" && <LineViz columns={db.columns} rows={db.rows} />}
-            {chartType === "pie"  && <PieViz  columns={db.columns} rows={db.rows} />}
-            {chartType === "table" && <DataTable columns={db.columns} rows={db.rows} />}
-          </div>
-        </>
-      )}
+    {/* Always show visualization — table is default for text-only data */}
+    <div style={{ marginTop: 8 }}>
+      {chartType === "bar"   && <BarViz    columns={db.columns} rows={db.rows} />}
+      {chartType === "line"  && <LineViz   columns={db.columns} rows={db.rows} />}
+      {chartType === "pie"   && <PieViz    columns={db.columns} rows={db.rows} />}
+      {(chartType === "table" || !chartType) && <DataTable columns={db.columns} rows={db.rows} />}
+    </div>
+  </>
+)}
 
       {/* No data */}
       {db?.success && db?.rows?.length === 0 && (
@@ -283,6 +291,7 @@ export default function App() {
         body: JSON.stringify({ question: q })
       });
       const data = await res.json();
+      console.log("*************",data)
       setResults(prev => [...prev, data]);
     } catch (e) {
       setResults(prev => [...prev, {
